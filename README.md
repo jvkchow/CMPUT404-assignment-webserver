@@ -27,4 +27,6 @@ compatible) http://docs.python.org/2/library/socketserver.html
 
 Sources Referenced:
 https://sparkbyexamples.com/python/python-convert-bytes-to-string/
+https://kodify.net/python/check-directory-exists/
+
 

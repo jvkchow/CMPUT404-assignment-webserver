@@ -37,7 +37,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
         data_parts = self.data.decode().split(" ")
         command = data_parts[0]
         path = data_parts[1]
-        print("Got a request of: %s\n" % self.data)
+        #print("Got a request of: %s\n" % self.data) THIS IS PART OF OG
+        print("Got a request of: %s" % self.data)
+
+        print("=======" + path + "==========") ####
 
         # check what command was sent
         if command == "GET":
@@ -52,54 +55,81 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         if path.endswith(".html"):
             file_path = "./www" + path
-            print(file_path) ####
             try:
                 file = open(file_path, "r")
                 file_contents = file.read()
                 file.close()
             except:
-                self.handle_404(self)
+                self.handle_404()
+                return
 
             content_type = "text/html"
             self.handle_200(content_type, file_contents)
 
         elif path.endswith(".css"):
             file_path = "./www" + path
-            print(file_path) ####
             try:
                 file = open(file_path, "r")
                 file_contents = file.read()
                 file.close()
             except:
-                self.handle_404(self)
+                self.handle_404()
+                return
 
             content_type = "text/css"
             self.handle_200(content_type, file_contents)
 
         elif path.endswith("/"):
             file_path = "./www" + path + "index.html"
-            print(file_path) ####
             try:
                 file = open(file_path, "r")
                 file_contents = file.read()
                 file.close()
             except:
-                self.handle_404(self)
+                self.handle_404()
+                return
 
             content_type = "text/html"
             self.handle_200(content_type, file_contents)
 
+        elif not path.endswith("/"):
+            redirected_path = path + "/"
+            deep_path = "./www" + path + "/"
+            if os.path.isdir(redirected_path):
+                self.handle_301(redirected_path)
+            elif os.path.isdir(deep_path):
+                self.handle_301(redirected_path)
+            else:
+                self.handle_404()
+                return
+
         else:
             self.handle_404()
 
+    def handle_301(self, redirected_path):
+
+        print("handle301\n")
+
+        response = "HTTP/1.1 301 Moved Permanently\r\nLocation: " + redirected_path + "\r\n"
+        self.request.sendall(bytearray(response, 'utf-8'))
+
     def handle_200(self, content_type, content):
+        
+        print("handle200\n")
+
         response = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\r\n" + content
         self.request.sendall(bytearray(response, 'utf-8'))
 
     def handle_404(self):
+
+        print("handle404\n")
+
         self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
 
     def handle_405(self):
+
+        print("handle405\n")
+
         self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
 
 if __name__ == "__main__":
