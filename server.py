@@ -89,8 +89,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
             content_type = "text/html"
             self.handle_200(content_type, file_contents)
 
+        else:
+            self.handle_404()
+
     def handle_200(self, content_type, content):
-        self.request.sendall(bytearray("HTTP/1.1 200 OK\nContent-Type: {content_type}\r\n{content}", 'utf-8'))
+        response = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\r\n" + content
+        self.request.sendall(bytearray(response, 'utf-8'))
 
     def handle_404(self):
         self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
