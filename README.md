@@ -23,4 +23,8 @@ But the server.py example is derived from the python documentation
 examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
+========================
+
+Sources Referenced:
+https://sparkbyexamples.com/python/python-convert-bytes-to-string/
 

@@ -1,6 +1,6 @@
 #  coding: utf-8 
 import socketserver
-
+import os
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,9 +30,73 @@ import socketserver
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
+
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+
+        # get the data parts
+        data_parts = self.data.decode().split(" ")
+        command = data_parts[0]
+        path = data_parts[1]
+        print("Got a request of: %s\n" % self.data)
+
+        # check what command was sent
+        if command == "GET":
+            self.handle_command(path)
+        else:
+            self.handle_405()
+
+    def handle_command(self, path):
+
+        version = "HTTP/1.1"
+        content_type = ""
+
+        if path.endswith(".html"):
+            file_path = "./www" + path
+            print(file_path) ####
+            try:
+                file = open(file_path, "r")
+                file_contents = file.read()
+                file.close()
+            except:
+                self.handle_404(self)
+
+            content_type = "text/html"
+            self.handle_200(content_type, file_contents)
+
+        elif path.endswith(".css"):
+            file_path = "./www" + path
+            print(file_path) ####
+            try:
+                file = open(file_path, "r")
+                file_contents = file.read()
+                file.close()
+            except:
+                self.handle_404(self)
+
+            content_type = "text/css"
+            self.handle_200(content_type, file_contents)
+
+        elif path.endswith("/"):
+            file_path = "./www" + path + "index.html"
+            print(file_path) ####
+            try:
+                file = open(file_path, "r")
+                file_contents = file.read()
+                file.close()
+            except:
+                self.handle_404(self)
+
+            content_type = "text/html"
+            self.handle_200(content_type, file_contents)
+
+    def handle_200(self, content_type, content):
+        self.request.sendall(bytearray("HTTP/1.1 200 OK\nContent-Type: {content_type}\r\n{content}", 'utf-8'))
+
+    def handle_404(self):
+        self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
+
+    def handle_405(self):
+        self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
