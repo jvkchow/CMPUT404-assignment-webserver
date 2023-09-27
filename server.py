@@ -37,10 +37,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         data_parts = self.data.decode().split(" ")
         command = data_parts[0]
         path = data_parts[1]
-        #print("Got a request of: %s\n" % self.data) THIS IS PART OF OG
-        print("Got a request of: %s" % self.data)
-
-        print("=======" + path + "==========") ####
+        print("Got a request of: %s\n" % self.data)
 
         # check what command was sent
         if command == "GET":
