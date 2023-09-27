@@ -47,9 +47,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
     def handle_command(self, path):
 
-        version = "HTTP/1.1"
-        content_type = ""
-
+        # checks if the file is a .html file and retrieves the content
         if path.endswith(".html"):
             file_path = "./www" + path
             try:
@@ -63,6 +61,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             content_type = "text/html"
             self.handle_200(content_type, file_contents)
 
+        # checks if the file is a .css file and retrieves the content
         elif path.endswith(".css"):
             file_path = "./www" + path
             try:
@@ -76,6 +75,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             content_type = "text/css"
             self.handle_200(content_type, file_contents)
 
+        # checks if the file just ends with '/'. if so, it adds index.html to the path and retrieves the content
         elif path.endswith("/"):
             file_path = "./www" + path + "index.html"
             try:
@@ -89,6 +89,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             content_type = "text/html"
             self.handle_200(content_type, file_contents)
 
+        # checks if the path does not have '/' meaning it needs to be redirected
         elif not path.endswith("/"):
             redirected_path = path + "/"
             deep_path = "./www" + path + "/"
@@ -100,34 +101,36 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 self.handle_404()
                 return
 
+        # this is the case where the file does not exist
         else:
             self.handle_404()
 
+    # sends the 301 response
+    # argument:
+    #   redirected_path: the new path with '/' added to the end
     def handle_301(self, redirected_path):
-
-        print("handle301\n")
-
-        response = "HTTP/1.1 301 Moved Permanently\r\nLocation: " + redirected_path + "\r\n"
-        self.request.sendall(bytearray(response, 'utf-8'))
-
-    def handle_200(self, content_type, content):
         
-        print("handle200\n")
-
-        response = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\r\n" + content
+        response = "HTTP/1.1 301 Moved Permanently\n\nLocation: " + redirected_path + "\n\n"
         self.request.sendall(bytearray(response, 'utf-8'))
 
+    # sends the 200 response
+    # arguments:
+    #   content_type: the content type of the file
+    #   content: the contents of the file
+    def handle_200(self, content_type, content):
+
+        response = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\n\n" + content
+        self.request.sendall(bytearray(response, 'utf-8'))
+
+    # sends the 404 response
     def handle_404(self):
 
-        print("handle404\n")
+        self.request.sendall(bytearray("HTTP/1.1 404 Not Found\n\n",'utf-8'))
 
-        self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n",'utf-8'))
-
+    # sends the 405 response
     def handle_405(self):
 
-        print("handle405\n")
-
-        self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n",'utf-8'))
+        self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\n\n",'utf-8'))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
